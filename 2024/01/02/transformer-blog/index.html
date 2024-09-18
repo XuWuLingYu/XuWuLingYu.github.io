@@ -4,14 +4,19 @@
   <meta charset="utf-8">
   
   
-  <title>Hexo</title>
+  <title>transformer_blog | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://example.com/index.html">
+  <meta name="description" content="Attention is all you need[论文](Attention is all you need.pdf) axiv:1706.03762代码Transformer克服了以往卷积与循环的不可并行性，并且采用常数复杂度的positional encoding.参数：N实验时为6主要架构：![[assets&#x2F;Pasted image 20240117103329.png]] P">
+<meta property="og:type" content="article">
+<meta property="og:title" content="transformer_blog">
+<meta property="og:url" content="http://example.com/2024/01/02/transformer-blog/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Attention is all you need[论文](Attention is all you need.pdf) axiv:1706.03762代码Transformer克服了以往卷积与循环的不可并行性，并且采用常数复杂度的positional encoding.参数：N实验时为6主要架构：![[assets&#x2F;Pasted image 20240117103329.png]] P">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-01-02T13:30:02.000Z">
+<meta property="article:modified_time" content="2024-09-18T13:36:55.792Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="paper reading">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
@@ -67,106 +72,7 @@
 </header>
 
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-occupancy-blog" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/01/17/occupancy-blog/" class="article-date">
-  <time class="dt-published" datetime="2024-01-17T07:23:19.000Z" itemprop="datePublished">2024-01-17</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/01/17/occupancy-blog/">occupancy_blog</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h2 id="VoxFormer"><a href="#VoxFormer" class="headerlink" title="VoxFormer"></a>VoxFormer</h2><p>![[assets&#x2F;assets&#x2F;Pasted image 20240122234506.png]]<br>这是一个单摄像机的任务。首先将摄像机过一个现成的深度估计模型，得到一个深度图（缺点：远处可能不准确），映射成三维的点云（每个像素一个点），然后和$Q\in R^{h<em>w</em>z<em>d}$进行融合，其中d是很大的数，h,w,z小于原图的分辨率。这个怎么做呢？首先将三维稀疏点云经过一个初步的$\Theta occ$变成了一个较低分辨率的$M_{out}&#x3D;{0,1}^{h</em>w*z}$，然后$Q_p&#x3D;Q[M_{out}]$由此产生很多空白（就是$M_{out}&#x3D;0$的部分），以节省开支。得到$Q_p$后，用它和Image Features作DFA，公式如下：![[assets&#x2F;Pasted image 20240123003240.png]]<br>我们注意到有一个东西叫做mask token，原因是$Q_p$只选择了一部分的像素进行DCA,所以mask token就将剩余部分来表示。mask token是一个可学习的embedding，随着训练而改变。<br>最后进行一个DA后上采样+全连接。</p>
-<h2 id="Scene-as-OCC"><a href="#Scene-as-OCC" class="headerlink" title="Scene as OCC"></a>Scene as OCC</h2><p>![[assets&#x2F;assets&#x2F;Pasted image 20240123222300.png]]<br>本篇文章主要提出了一个新的benchmark——openOCC，并且为这个数据集设计了一个新的网络OccNet.包括重建OCC和利用OCC两个部分。第一个部分将摄像头画面过backbone，得到features,然后结合了BEVFormer的Encoder部分，改进了Decoder:<br>由于将BEV特征直接转化为Voxel特征会造成精度大量丢失，于是Decoder采用了串联式，设BEV特征为$R^{Z_{BEV},H,W,C_{BEV}}$,Z表示高度，C表示数据维度。$Z_{BEV}&#x3D;1$,设Voxel特征为$R^{Z_{OCC},H,W,C_{OCC}}$,Z更大了，C同样是维度。那么中间层得到的变量是$R^{Z_i,H,W,C_i}$,其中$Z_i$和$C_i$都是$BEV$到$OCC$的线性插值。<br>步骤：$B_{t-1},Q_{t}$通过feedforward变成$V’<em>{t-1}$和$V’</em>{t}$,并且经过DA注意力得到细化后的$V’_{t}$,以此类推。最终得到$V_t$.之后的EoO就比较简单了，拿Occ数据来进行downstream的决策。<br>值得注意的是，3D的DA有所改动：![[assets&#x2F;Pasted image 20240123234816.png]]<br>其中K远小于HWZ.</p>
-<p>关于benchmark-openOCC,基于数据集nuScenes，为周围的摄像头提供了3DOcc和相关注释。<br>对于如何生成注释，openOCC将Lidar的点集拆成前景和背景，在世界坐标系将静态背景进行累加，在对象坐标系中对运动前景进行累加，以达到较为精确的效果。更加密集。</p>
-<h2 id="Occ3D"><a href="#Occ3D" class="headerlink" title="Occ3D"></a>Occ3D</h2><p>主要工作是构建了一个benchmark，分为Occ3d-waymo和Occ3d-nuScene.并且提出了“从粗略到精细占用网络”CTF-Occ.</p>
-<h3 id="数据集的构建"><a href="#数据集的构建" class="headerlink" title="数据集的构建"></a>数据集的构建</h3><p>![[assets&#x2F;assets&#x2F;Pasted image 20240124104601.png]]<br>任务：根据已知的数据集（多摄像头时序图像，3D激光雷达点云序列，来自IMU的3D位姿序列），采用半标注技术生成带语义Occ网格。既然是半标注，所以需要人工标注的框形语义信息和可选的点级语义信息。</p>
-<ul>
-<li>体素密集化：点云聚合，结合位姿信息处理激光雷达的点云，转化成世界坐标系，分割背景和前景，根据每帧的标注和以良好处理动态模糊，使用KNN进行标签重建，网孔重建使得信息更密集。</li>
-<li>遮挡推理：通过射线法判断哪些体素是看得到的，哪些是看不到的，得到一个“未知”掩码mask,单独设置为“未知”标签。</li>
-<li>基于图像的体素细化：本文使用图像的语义分割掩膜建立3D体素与2D像素的关系。类似上一步中的射线投射方法连接图像原点与占用体素，找到与图像像素语义标签相同的第一个体素，并设置射线穿过的之前所有体素为“空”。</li>
-</ul>
-<h3 id="CtF-Occ"><a href="#CtF-Occ" class="headerlink" title="CtF-Occ"></a>CtF-Occ</h3><p>![[assets&#x2F;assets&#x2F;Pasted image 20240125220621.png]]<br>我们可以看到，首先将图像经过backbone形成多维特征，并且将backbone的分层中间层分别作为输入到细化过程，接下来看细化过程：</p>
-<ul>
-<li>首先是一个比较小，精度比较低的体素Embedding,经过Token Selection和3D与2D之间的空间交叉注意力融合形成一个体素的结果，再经过3D卷积进一步细化，并与下一个匹配的特征进行融合。</li>
-<li>为了减少计算，引入了Token Selection的概念，利用标签Occ有监督地训练一个判别器判断某点体素是否为空，并且把不确定是否为空的留下来计算，确定是空的就不用计算了。这个判别器选择最不确定的K个体素参与后续计算，K是超参数</li>
-<li>最后得到$R^{长宽高C’}$的一个东西，我们把每一个像素过一遍MLP，得到$R^{长宽高C}$的Occ网络，其中C是语义数量。<br>优势：摆脱了BEV压缩高度的限制，对小物体识别精度更高。</li>
-</ul>
-<h2 id="FB-OCC"><a href="#FB-OCC" class="headerlink" title="FB-OCC"></a>FB-OCC</h2><h3 id="Forward-and-backward"><a href="#Forward-and-backward" class="headerlink" title="Forward and backward"></a>Forward and backward</h3><ul>
-<li>forward projection(前向投影)是指依据每一个2D图像的像素点，画出一条射线，射到3D点上面，如图：![[assets&#x2F;Pasted image 20240125224729.png]]缺点很明显：就是在远处会比较稀疏，不能完全覆盖所有的体素。VoxFormer就才用了前向投影的思想。</li>
-<li>backward projection(反向投影)与前向投影相反，对于每一个体素，计算在图像上的位置，，BEVFormer就是基于反向投影的。反向投影也存在一些缺点，就是可能无法正确处理遮挡关系，为此当然提出了一些比如遮挡mask等技术来解决此类问题。BEVFormer在空间注意力融合的时候就<br>本文将Forward和Backward进行了融合，同时结合了两者的优点，具体操作为：</li>
-<li>为了解决前向投影的稀疏问题，我们使用反向投影特征来提炼出前向投影中的稀疏部分。</li>
-<li>为了解决反向投影的深度问题缺失，而产生“假阳性”（即看不到的地方多出来了语义信息）的问题，文章才用了深度感知的反向投影，利用深度关系来“衡量”每一个投影的质量，从而达到抑制假阳性的目的。</li>
-</ul>
-<h3 id="模型架构"><a href="#模型架构" class="headerlink" title="模型架构"></a>模型架构</h3><p>![[assets&#x2F;assets&#x2F;Pasted image 20240126145318.png]]<br>首先用backbone提取图像特征，得到一个Image Features $F$,随后使用Depth Net将图像进行一个深度化操作，得到深度图像；</p>
-<ul>
-<li>Forward Projection，结合图像特征和深度特征，将每一个图片像素点投影在空间点云中，得到一个稀疏的点云。</li>
-<li>Backward Projection，将拍扁后的点云图作为BEV的Query，结合深度信息和图像信息进行一个BEVFormer类似的操作，即为Depth-Aware Backward Projection。最后得到BEV特征。</li>
-<li>将BEV特征升维之后与Forward Projection的点云图进行融合，得到Occupancy Head用于downstream.</li>
-</ul>
-<h3 id="模型训练"><a href="#模型训练" class="headerlink" title="模型训练"></a>模型训练</h3><p>文章提出了2D转3D的backbone中常见的问题——过拟合。如果backbone参数量过大，可能会造成过拟合。但是相比于之前300M和100M的backbone,本文用了1B参数量的InternetImageH作为backbone。</p>
-<ul>
-<li>深度预训练，将深度信息单独作为一部分进行有监督学习，为了防止模型过于偏向深度信息，语义先验丢失，我们对Image Features进行一个Semantic Mask的有监督学习。但是雷达点云没有语义信息怎么办呢，于是作者使用了SAM模型进行了自动标记；对nuScenes提供的具有边界框注释的事物类别，使用框提示为每个对象生成高质量的语义掩码；对于没有边界框注释的道路与建筑物等信息，我们只能利用点云语义分割信息，对于每个类别我们选三个点作为点提示，以生成相应的语义掩码。<br>我们将预训练的模型作为后续训练的起始点。</li>
-</ul>
-<h3 id="模型预测"><a href="#模型预测" class="headerlink" title="模型预测"></a>模型预测</h3><ul>
-<li>通过水平反转输入图像，水平垂直翻转3D空间后取平均得到最终结果。</li>
-<li>使用时间测试时间增强策略（TTA），对于静态体素，采用先前帧的靠近自我车的体素来替换当前帧的体素，因为越远精度越低。</li>
-</ul>
-<h2 id="OccFormer"><a href="#OccFormer" class="headerlink" title="OccFormer"></a>OccFormer</h2><p>![[assets&#x2F;Pasted image 20240128211901.png]]</p>
-<p>模型结构:</p>
-<ul>
-<li>Image Encoder，除了将图像信息进行了一个backbone之后，额外进行了一个neck操作。最后分辨率是原图像的$\frac{1}{16}$.</li>
-<li>使用类似LSS的范式得到3D的Depth Distribution:$R^{N<em>D</em>H<em>W}$,获得上下文特征Context Feature$R^{N</em>C_{conv}<em>H</em>W}$,二者做乘法得到$R^{N<em>D</em>H<em>W</em>C_{conv}}$的特征，通过体素池化（减少特征量，类似2D池化）得到$R^{C_{conv}<em>X</em>Y*Z}$的体素网格。</li>
-<li>![[assets&#x2F;Pasted image 20240128224501.png]]Dual Path Transformer:主要分为两部分：<ul>
-<li>Local部分直接使用3D特征，用于捕捉细颗粒度特征；</li>
-<li>Global部分使用拍扁后的2D特征，用于捕捉全局较大的特征。<br>两者使用共享权重的windowed Attention进行注意力处理，考虑到BEV特征如果之后直接进行Self-attention的话太消耗内存了，于是使用了ASPP技术，并且用bottleneck使得通道数减少了四倍。![[assets&#x2F;Pasted image 20240128224919.png]]<br>ASPP（上图）<br>之后再和全连接后的Local特征进行乘法，与Local体素特征进行融合后输出。<br>unsqueeze是沿着高度方向的。<br>![[assets&#x2F;Pasted image 20240128225138.png]]</li>
-</ul>
-</li>
-<li>Transformer Occupancy Decoder:采用比较火的语义3D Mask思路，包括transformer decoder和pixel decoder两部分。最终的掩码预测由这两个嵌入之间的点乘得出的。</li>
-<li>Pixel Decoder:也就是Multi-Scaled Deformable Attention，对于每一个点，加上注意力权重乘以周围不同Layer的某若干个点，增强多尺度特征的语义信息：![[assets&#x2F;Pasted image 20240128230522.png]]$N_l$表示层级数量。</li>
-<li>Transformer Decoder![[assets&#x2F;Pasted image 20240129094214.png]]我们细看这张图，主要流程是：对于第一个decoder,Query是参数化的序列；然后与Voxel Features进行Masked Attention后进行self-attention,最后全连接后，重新加上遮罩，作为$Q_{2}$的Query Features继续和下一个scale的特征融合作为Voxel输入，而新的Query Feature被这样生成：![[assets&#x2F;Pasted image 20240129094358.png]]<br>其中$M_{l-1}$表示遮罩，由0和$-\infty$组成，表示该体素关心的点；然后就是比较typicle的$softmax(QK^T)V$再加上残差。注意，L次迭代的每一次迭代结束，Query Features都会被拿去预测一遍语义信息$p_l$和一个mask embedding,最后mask embedding经过per-pixel操作（Mask2Former类似）之后和sigmoid点积得到3D掩码$M_{l}$,最后占用预测为：<br>$$Y&#x3D;\sum_{i&#x3D;1}^{N_q}p_i\cdot M_i$$</li>
-<li>Preserve Pooling 考虑每次得到的mask都要降维给下一迭代使用，Mask2Former采用双线性插值以保留局部特征，本文使用简单的最大池化，取得了不错的效果。</li>
-<li>Class-Guided Sampling 由于3D空间中样本的非均匀性，在计算损失的时候，首先估计训练集中每个样本的频率，再按照$w_c&#x3D;1&#x2F;n_c$,$w_c&#x3D;w_c&#x2F;min(w_c),w_c&#x3D;(w_c)^\beta$进行设置采样频率，以达到样本越小，采样频率越高的效果。</li>
-</ul>
-<h2 id="Surround-Occ"><a href="#Surround-Occ" class="headerlink" title="Surround Occ"></a>Surround Occ</h2><p>![[assets&#x2F;Pasted image 20240130161047.png]]<br>主要就是多个尺度的特征图经过backbone后传入2D-3DSpatial Attention,之后形成3D特征，每个3D特征等于自己特征图得出的加上自己上面小尺度3D特征反卷积得出，最后进行OccPrediction，每一个尺度都单独进行监督。</p>
-<ul>
-<li>Spatial Cross-Attention。在重建3D的时候，传统方法对于每一个3D的体素，它关心每一个视图的权重是相同的，这会产生错误导致效果不好，为此，作者提出了2D-3D 空间交叉注意力，如图（左1）![[assets&#x2F;Pasted image 20240130170215.png]]对于每一个需要重建的3D体素，模仿BEV的方法，只关心命中的视图的具体某一处点，这属于Backward方法.<img src="/%E7%B1%BB%E4%BC%BCBEV" alt="[assets/Pasted image 20240130170739.png]"></li>
-<li>基于Lidar稀疏点云和有限语义标注的标签生成器：![[assets&#x2F;Pasted image 20240130170944.png]]思路和之前比较类似，分割动态和静态，叠加，补全。</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/01/17/occupancy-blog/" data-id="cm17wp8p50000qouu81v75r4c" data-title="occupancy_blog" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/paper-reading/" rel="tag">paper reading</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-transformer-blog" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+        <section id="main"><article id="post-transformer-blog" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/01/02/transformer-blog/" class="article-date">
   <time class="dt-published" datetime="2024-01-02T13:30:02.000Z" itemprop="datePublished">2024-01-02</time>
@@ -179,8 +85,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/01/02/transformer-blog/">transformer_blog</a>
+    <h1 class="p-name article-title" itemprop="headline name">
+      transformer_blog
     </h1>
   
 
@@ -247,11 +153,23 @@
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
+  
+    <a href="/2024/01/17/occupancy-blog/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          occupancy_blog
+        
+      </div>
+    </a>
+  
+  
+</nav>
 
   
+</article>
 
 
 </section>
