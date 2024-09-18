@@ -91,17 +91,17 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h2 id="VoxFormer"><a href="#VoxFormer" class="headerlink" title="VoxFormer"></a>VoxFormer</h2><p>![[assets&#x2F;assets&#x2F;Pasted image 20240122234506.png]]<br>这是一个单摄像机的任务。首先将摄像机过一个现成的深度估计模型，得到一个深度图（缺点：远处可能不准确），映射成三维的点云（每个像素一个点），然后和$Q\in R^{h<em>w</em>z<em>d}$进行融合，其中d是很大的数，h,w,z小于原图的分辨率。这个怎么做呢？首先将三维稀疏点云经过一个初步的$\Theta occ$变成了一个较低分辨率的$M_{out}&#x3D;{0,1}^{h</em>w*z}$，然后$Q_p&#x3D;Q[M_{out}]$由此产生很多空白（就是$M_{out}&#x3D;0$的部分），以节省开支。得到$Q_p$后，用它和Image Features作DFA，公式如下：![[assets&#x2F;Pasted image 20240123003240.png]]<br>我们注意到有一个东西叫做mask token，原因是$Q_p$只选择了一部分的像素进行DCA,所以mask token就将剩余部分来表示。mask token是一个可学习的embedding，随着训练而改变。<br>最后进行一个DA后上采样+全连接。</p>
-<h2 id="Scene-as-OCC"><a href="#Scene-as-OCC" class="headerlink" title="Scene as OCC"></a>Scene as OCC</h2><p>![[assets&#x2F;assets&#x2F;Pasted image 20240123222300.png]]<br>本篇文章主要提出了一个新的benchmark——openOCC，并且为这个数据集设计了一个新的网络OccNet.包括重建OCC和利用OCC两个部分。第一个部分将摄像头画面过backbone，得到features,然后结合了BEVFormer的Encoder部分，改进了Decoder:<br>由于将BEV特征直接转化为Voxel特征会造成精度大量丢失，于是Decoder采用了串联式，设BEV特征为$R^{Z_{BEV},H,W,C_{BEV}}$,Z表示高度，C表示数据维度。$Z_{BEV}&#x3D;1$,设Voxel特征为$R^{Z_{OCC},H,W,C_{OCC}}$,Z更大了，C同样是维度。那么中间层得到的变量是$R^{Z_i,H,W,C_i}$,其中$Z_i$和$C_i$都是$BEV$到$OCC$的线性插值。<br>步骤：$B_{t-1},Q_{t}$通过feedforward变成$V’<em>{t-1}$和$V’</em>{t}$,并且经过DA注意力得到细化后的$V’_{t}$,以此类推。最终得到$V_t$.之后的EoO就比较简单了，拿Occ数据来进行downstream的决策。<br>值得注意的是，3D的DA有所改动：![[assets&#x2F;Pasted image 20240123234816.png]]<br>其中K远小于HWZ.</p>
+        <h2 id="VoxFormer"><a href="#VoxFormer" class="headerlink" title="VoxFormer"></a>VoxFormer</h2><p>![[assets&#x2F;Pasted image 20240122234506.png]]<br>这是一个单摄像机的任务。首先将摄像机过一个现成的深度估计模型，得到一个深度图（缺点：远处可能不准确），映射成三维的点云（每个像素一个点），然后和$Q\in R^{h<em>w</em>z<em>d}$进行融合，其中d是很大的数，h,w,z小于原图的分辨率。这个怎么做呢？首先将三维稀疏点云经过一个初步的$\Theta occ$变成了一个较低分辨率的$M_{out}&#x3D;{0,1}^{h</em>w*z}$，然后$Q_p&#x3D;Q[M_{out}]$由此产生很多空白（就是$M_{out}&#x3D;0$的部分），以节省开支。得到$Q_p$后，用它和Image Features作DFA，公式如下：![[assets&#x2F;Pasted image 20240123003240.png]]<br>我们注意到有一个东西叫做mask token，原因是$Q_p$只选择了一部分的像素进行DCA,所以mask token就将剩余部分来表示。mask token是一个可学习的embedding，随着训练而改变。<br>最后进行一个DA后上采样+全连接。</p>
+<h2 id="Scene-as-OCC"><a href="#Scene-as-OCC" class="headerlink" title="Scene as OCC"></a>Scene as OCC</h2><p>![[assets&#x2F;Pasted image 20240123222300.png]]<br>本篇文章主要提出了一个新的benchmark——openOCC，并且为这个数据集设计了一个新的网络OccNet.包括重建OCC和利用OCC两个部分。第一个部分将摄像头画面过backbone，得到features,然后结合了BEVFormer的Encoder部分，改进了Decoder:<br>由于将BEV特征直接转化为Voxel特征会造成精度大量丢失，于是Decoder采用了串联式，设BEV特征为$R^{Z_{BEV},H,W,C_{BEV}}$,Z表示高度，C表示数据维度。$Z_{BEV}&#x3D;1$,设Voxel特征为$R^{Z_{OCC},H,W,C_{OCC}}$,Z更大了，C同样是维度。那么中间层得到的变量是$R^{Z_i,H,W,C_i}$,其中$Z_i$和$C_i$都是$BEV$到$OCC$的线性插值。<br>步骤：$B_{t-1},Q_{t}$通过feedforward变成$V’<em>{t-1}$和$V’</em>{t}$,并且经过DA注意力得到细化后的$V’_{t}$,以此类推。最终得到$V_t$.之后的EoO就比较简单了，拿Occ数据来进行downstream的决策。<br>值得注意的是，3D的DA有所改动：![[assets&#x2F;Pasted image 20240123234816.png]]<br>其中K远小于HWZ.</p>
 <p>关于benchmark-openOCC,基于数据集nuScenes，为周围的摄像头提供了3DOcc和相关注释。<br>对于如何生成注释，openOCC将Lidar的点集拆成前景和背景，在世界坐标系将静态背景进行累加，在对象坐标系中对运动前景进行累加，以达到较为精确的效果。更加密集。</p>
 <h2 id="Occ3D"><a href="#Occ3D" class="headerlink" title="Occ3D"></a>Occ3D</h2><p>主要工作是构建了一个benchmark，分为Occ3d-waymo和Occ3d-nuScene.并且提出了“从粗略到精细占用网络”CTF-Occ.</p>
-<h3 id="数据集的构建"><a href="#数据集的构建" class="headerlink" title="数据集的构建"></a>数据集的构建</h3><p>![[assets&#x2F;assets&#x2F;Pasted image 20240124104601.png]]<br>任务：根据已知的数据集（多摄像头时序图像，3D激光雷达点云序列，来自IMU的3D位姿序列），采用半标注技术生成带语义Occ网格。既然是半标注，所以需要人工标注的框形语义信息和可选的点级语义信息。</p>
+<h3 id="数据集的构建"><a href="#数据集的构建" class="headerlink" title="数据集的构建"></a>数据集的构建</h3><p>![[assets&#x2F;Pasted image 20240124104601.png]]<br>任务：根据已知的数据集（多摄像头时序图像，3D激光雷达点云序列，来自IMU的3D位姿序列），采用半标注技术生成带语义Occ网格。既然是半标注，所以需要人工标注的框形语义信息和可选的点级语义信息。</p>
 <ul>
 <li>体素密集化：点云聚合，结合位姿信息处理激光雷达的点云，转化成世界坐标系，分割背景和前景，根据每帧的标注和以良好处理动态模糊，使用KNN进行标签重建，网孔重建使得信息更密集。</li>
 <li>遮挡推理：通过射线法判断哪些体素是看得到的，哪些是看不到的，得到一个“未知”掩码mask,单独设置为“未知”标签。</li>
 <li>基于图像的体素细化：本文使用图像的语义分割掩膜建立3D体素与2D像素的关系。类似上一步中的射线投射方法连接图像原点与占用体素，找到与图像像素语义标签相同的第一个体素，并设置射线穿过的之前所有体素为“空”。</li>
 </ul>
-<h3 id="CtF-Occ"><a href="#CtF-Occ" class="headerlink" title="CtF-Occ"></a>CtF-Occ</h3><p>![[assets&#x2F;assets&#x2F;Pasted image 20240125220621.png]]<br>我们可以看到，首先将图像经过backbone形成多维特征，并且将backbone的分层中间层分别作为输入到细化过程，接下来看细化过程：</p>
+<h3 id="CtF-Occ"><a href="#CtF-Occ" class="headerlink" title="CtF-Occ"></a>CtF-Occ</h3><p>![[assets&#x2F;Pasted image 20240125220621.png]]<br>我们可以看到，首先将图像经过backbone形成多维特征，并且将backbone的分层中间层分别作为输入到细化过程，接下来看细化过程：</p>
 <ul>
 <li>首先是一个比较小，精度比较低的体素Embedding,经过Token Selection和3D与2D之间的空间交叉注意力融合形成一个体素的结果，再经过3D卷积进一步细化，并与下一个匹配的特征进行融合。</li>
 <li>为了减少计算，引入了Token Selection的概念，利用标签Occ有监督地训练一个判别器判断某点体素是否为空，并且把不确定是否为空的留下来计算，确定是空的就不用计算了。这个判别器选择最不确定的K个体素参与后续计算，K是超参数</li>
@@ -113,7 +113,7 @@
 <li>为了解决前向投影的稀疏问题，我们使用反向投影特征来提炼出前向投影中的稀疏部分。</li>
 <li>为了解决反向投影的深度问题缺失，而产生“假阳性”（即看不到的地方多出来了语义信息）的问题，文章才用了深度感知的反向投影，利用深度关系来“衡量”每一个投影的质量，从而达到抑制假阳性的目的。</li>
 </ul>
-<h3 id="模型架构"><a href="#模型架构" class="headerlink" title="模型架构"></a>模型架构</h3><p>![[assets&#x2F;assets&#x2F;Pasted image 20240126145318.png]]<br>首先用backbone提取图像特征，得到一个Image Features $F$,随后使用Depth Net将图像进行一个深度化操作，得到深度图像；</p>
+<h3 id="模型架构"><a href="#模型架构" class="headerlink" title="模型架构"></a>模型架构</h3><p>![[assets&#x2F;Pasted image 20240126145318.png]]<br>首先用backbone提取图像特征，得到一个Image Features $F$,随后使用Depth Net将图像进行一个深度化操作，得到深度图像；</p>
 <ul>
 <li>Forward Projection，结合图像特征和深度特征，将每一个图片像素点投影在空间点云中，得到一个稀疏的点云。</li>
 <li>Backward Projection，将拍扁后的点云图作为BEV的Query，结合深度信息和图像信息进行一个BEVFormer类似的操作，即为Depth-Aware Backward Projection。最后得到BEV特征。</li>
