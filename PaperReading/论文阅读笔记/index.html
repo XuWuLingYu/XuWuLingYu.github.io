@@ -1,0 +1,924 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../Video%20Diffusion%20Paper%20Reading/">
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.41">
+    
+    
+      
+        <title>Basic Attention & Occupancy - XuWuLingYu's Blog System</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.0253249f.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="XuWuLingYu&#39;s Blog System" class="md-header__button md-logo" aria-label="XuWuLingYu's Blog System" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            XuWuLingYu's Blog System
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Basic Attention & Occupancy
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="XuWuLingYu&#39;s Blog System" class="md-nav__button md-logo" aria-label="XuWuLingYu's Blog System" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    XuWuLingYu's Blog System
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Paper Reading
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Paper Reading
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../3D%20Reconstruction%20Paper%20Reading/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3DGS
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Video%20Diffusion%20Paper%20Reading/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Video Diffusion
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Basic Attention & Occupancy
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Basic Attention & Occupancy
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#attention-is-all-you-need" class="md-nav__link">
+    <span class="md-ellipsis">
+      Attention is all you need
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attention is all you need">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#positional-encoding" class="md-nav__link">
+    <span class="md-ellipsis">
+      Positional Encoding
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encoder" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encoder
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decoder" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decoder
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sparse-transformer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sparse Transformer
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sstvos" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSTVOS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detr" class="md-nav__link">
+    <span class="md-ellipsis">
+      DETR
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DETR">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#detrattention" class="md-nav__link">
+    <span class="md-ellipsis">
+      可变形DETR+可变形Attention
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bev-former" class="md-nav__link">
+    <span class="md-ellipsis">
+      BEV Former
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#attention-is-all-you-need" class="md-nav__link">
+    <span class="md-ellipsis">
+      Attention is all you need
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attention is all you need">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#positional-encoding" class="md-nav__link">
+    <span class="md-ellipsis">
+      Positional Encoding
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encoder" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encoder
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decoder" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decoder
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sparse-transformer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sparse Transformer
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sstvos" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSTVOS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detr" class="md-nav__link">
+    <span class="md-ellipsis">
+      DETR
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DETR">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#detrattention" class="md-nav__link">
+    <span class="md-ellipsis">
+      可变形DETR+可变形Attention
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bev-former" class="md-nav__link">
+    <span class="md-ellipsis">
+      BEV Former
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="_1">前置论文</h1>
+<h2 id="attention-is-all-you-need">Attention is all you need</h2>
+<p>论文：axiv:1706.03762
+<a href="https://github.com/hyunwoongko/transformer">代码</a>
+Transformer克服了以往卷积与循环的不可并行性，并且采用常数复杂度的positional encoding.
+参数：N实验时为6
+主要架构：
+<img alt="" src="../imgs/Pasted%20image%2020240117103329.png" /></p>
+<h3 id="positional-encoding">Positional Encoding</h3>
+<p>假设输入有n个词，每个词有512维；那么输入矩阵是(n,512)的。
+于是我们的位置掩码也是一个(n,512)的矩阵，其中的计算公式为<span class="arithmatex">\(<span class="arithmatex">\(PE_{(pos,2i)}=sin(pos/10000^{2i/512})\)</span>\)</span>
+<span class="arithmatex">\(<span class="arithmatex">\(PE_{(pos,2i+1)}=cos(pos/10000^{2i/512})\)</span>\)</span></p>
+<h3 id="encoder">Encoder</h3>
+<p>由N=6个部分组成，每个部分分为多头注意力+Add&amp;Norm和全连接 +Add&amp;Norm两部分，同时采用残差思想,把每一小部分的输出都加上输入。
+多头注意力的公式：
+(由于是自注意力机制，所以<span class="arithmatex">\(Q,K,V\)</span>都是<span class="arithmatex">\(X\)</span>)
+<span class="arithmatex">\(<span class="arithmatex">\(Q_i=X W_i^Q\)</span>\)</span>
+<span class="arithmatex">\(<span class="arithmatex">\(K_i=XW_i^K\)</span>\)</span>
+<span class="arithmatex">\(<span class="arithmatex">\(V_i=XW_i^V\)</span>\)</span>
+其中<span class="arithmatex">\(W_i^Q\in(512,d_k),W_i^K\in (512,d_k),W_i^V\in(512,d_v)\)</span>都是可以被训练的。
+注意力公式为：
+<span class="arithmatex">\(<span class="arithmatex">\(Attention(Q,K,V)=softmax\left(\frac{QK^T}{\sqrt{512}}\right)V\)</span>\)</span>
+多头注意力公式为
+<span class="arithmatex">\(<span class="arithmatex">\(MultiHeadAttention=concat([Attention(Q_i,K_i,V_i)],axis=0)W^O\)</span>\)</span>
+<span class="arithmatex">\(<span class="arithmatex">\(W^O\in (d_v*HeadNumber,512)\)</span>\)</span></p>
+<pre><code class="language-Python">class EncoderLayer(nn.Module):
+
+    def __init__(self, d_model, ffn_hidden, n_head, drop_prob):
+        super(EncoderLayer, self).__init__()
+        self.attention = MultiHeadAttention(d_model=d_model, n_head=n_head)
+        self.norm1 = LayerNorm(d_model=d_model)
+        self.dropout1 = nn.Dropout(p=drop_prob)
+        self.ffn = PositionwiseFeedForward(d_model=d_model, hidden=ffn_hidden, drop_prob=drop_prob)
+        self.norm2 = LayerNorm(d_model=d_model)
+        self.dropout2 = nn.Dropout(p=drop_prob)
+    def forward(self, x, src_mask):
+        # 1. compute self attention
+        _x = x
+        x = self.attention(q=x, k=x, v=x, mask=src_mask)
+        # 2. add and norm
+        x = self.dropout1(x)
+        x = self.norm1(x + _x)
+        # 3. positionwise feed forward network
+        _x = x
+        x = self.ffn(x)
+
+        # 4. add and norm
+        x = self.dropout2(x)
+        x = self.norm2(x + _x)#残差
+        return x
+</code></pre>
+<p>下面是整个Encoder的模型</p>
+<pre><code class="language-Python">class Encoder(nn.Module):
+
+    def __init__(self, enc_voc_size, max_len, d_model, ffn_hidden, n_head, n_layers, drop_prob, device):
+        super().__init__()
+        self.emb = TransformerEmbedding(d_model=d_model,
+            max_len=max_len,vocab_size=enc_voc_size,
+            drop_prob=drop_prob,device=device)
+        self.layers = nn.ModuleList([EncoderLayer(d_model=d_model,ffn_hidden=ffn_hidden,n_head=n_head,drop_prob=drop_prob)
+        for _ in range(n_layers)])
+
+    def forward(self, x, src_mask):
+        x = self.emb(x)
+        for layer in self.layers:
+            x = layer(x, src_mask)
+        return x
+</code></pre>
+<h3 id="decoder">Decoder</h3>
+<p>Decoder的架构和Encoder类似，由多个相同的Layer组成，每个Layer分为三部分：</p>
+<ul>
+<li>Multihead Self-Attention部分</li>
+<li>Multihead Masked-Attention部分
+    其中k,v为encoder的输出结果，q是上一个小部分的输出</li>
+<li>Feedforward全连接部分</li>
+</ul>
+<p>每一个部分都有一个残差和LayerNorm，残差的实现方式是<code>LayerNorm(x_+x)</code>.
+这里的遮罩，原因是输入部分也存在一些未来的数据，为了防止模型看到未来的数据，把所有未来的数据都设置成<span class="arithmatex">\(-\infty\)</span>,于是在attention的过程中会变成0.
+mask是在decoder的第一个多头自注意力阶段的score部分（也就是<span class="arithmatex">\(\frac{QK^T}{\sqrt{n_dim}}\)</span>）使用的。mask一般是一个下三角矩阵，上边是0，代表需要遮掉的部分，下边是1，代表不需要遮掉得部分。
+<img alt="" src="../imgs/Pasted%20image%2020240117204159.png" />
+如图，位于第i位的word无法和i+1位的词语产生attention，因此杜绝了看到未来词。简化了操作。
+除此之外还有padding mask,为了适应短句子，我们往往会在句子后面添加padding，我们通过padding mask来避免padding对正常词产生的mask影响.
+Transformer具有高并行性，克服了以往RNN等Seq2Seq Model的需要一句话中一个一个词训练的局限性，并且不需要Covolution,只需要fc和attention。具有跨越式的效果。</p>
+<h2 id="sparse-transformer">Sparse Transformer</h2>
+<p><a href="../Papers/SparseTransformer.pdf">论文</a>
+工作：修改了一些架构和残差（其次），把复杂度由<span class="arithmatex">\(O(N^2)\)</span>改成<span class="arithmatex">\(O(N\sqrt{N})\)</span>.
+论文首先分析了一个128layer的transformer架构，看看每一层注意力都在关注什么：
+<img alt="" src="../imgs/Pasted%20image%2020240118093520.png" />
+黑色表示Transformer的下三角掩码，白色斑点或者条纹表示注意力机制注意到的东西.(a)部分是开始几个layer,只注意了靠近结尾的部分；(b)部分是19和20的layer,关注了整个纵列与整个横列。(c)部分是一些layer关注了整体部分。(d)部分是64~128的layer,只关注很少的部分。
+于是我们可以看到，大部分layer其实是没有用到全部的attention的，这也就给了我们操作空间。
+<img alt="" src="../imgs/Pasted%20image%2020240118093352.png" />
+论文提出了b和c的两种架构以保留性能的同时加快运算。
+本质是在做什么事情呢？
+原来的transformer的attention架构，对于第i个输入，关注的是
+<span class="arithmatex">\(<span class="arithmatex">\(S=\{j|j\le i\}\)</span>\)</span>
+这些就使得总共<span class="arithmatex">\(n\)</span>个输入，复杂度在<span class="arithmatex">\(n^2\)</span>.
+但是呢，我们可以调整一下关注的对象，使得复杂度变低。
+但是不能乱改啊！我们需要遵循一个原则：
+对于任意一个i，i和任意<span class="arithmatex">\(j\le i\)</span>,都<strong>最多</strong>只需要走2步能够到达彼此。
+比如i=10,10和3,7,9建立起了关系,9和8,6,2建立起了关系，7和6,5,3建立起了关系，3和2,1建立起了关系。于是我想要找10和任意一个1~9的数的关系，至多需要追溯两步。当然，如果至多需要追溯p步，则复杂度会更低。
+论文证明了如果追溯p步的情况下，复杂度为
+<span class="arithmatex">\(<span class="arithmatex">\(Attention=O(n^{1+1/p})\)</span>\)</span>
+当p取2的情况下（为了保证性能），复杂度就是<span class="arithmatex">\(O(n\sqrt{n})\)</span>.</p>
+<p>具体的，论文给出了两种解决方案（对应着（b）和（c））
+首先令<span class="arithmatex">\(l=(int)\sqrt{n}\)</span>
+(b).strided
+<span class="arithmatex">\(A=\{j|j\in [i-l,i-1]\}\cup\{j|(j-i)\space mod\space l=0\}\)</span>
+(c).fixed
+<span class="arithmatex">\(A=\{j|[j/l]=[i/l]\}\cup\{j|j\space mod \space l =[l-c,l)\}\)</span>
+c是一个超参数，一般选择为stride的<span class="arithmatex">\(\frac{1}{16}\)</span>.
+作者提出，<strong>Strided Attention适用于图像、音频；Fixed Attention适用于文本。</strong>
+<img alt="" src="../imgs/Pasted%20image%2020240118144802.png" />
+同时还改进了结构。</p>
+<h2 id="sstvos">SSTVOS</h2>
+<p><a href="../Papers/SpatiotemporalTransformers.pdf">论文</a>
+<img alt="" src="../imgs/Pasted%20image%2020240119135953.png" />
+SSTVOS的架构如上：
+相比于Transformer，改动了Decoder部分，接下来是数据流：
+<span class="arithmatex">\(\tau\)</span>张图片，经过ResNet提取出特征后加上PE(Learn,SinCos,None均可)，输入到Encoder里面(L层Layer),每一层为：</p>
+<ul>
+<li>Multi-Head Sparse Attention,具体的Sparse方式下面介绍.</li>
+<li>全连接</li>
+<li>（全部有残差部分）
+接下来输入Decoder的有三个部分：</li>
+<li>Encoder输出</li>
+<li>L个Encoder的Attention-Score经过处理的（<span class="arithmatex">\(A_v\in R^{L*O*\tau*H'*W'}\)</span>）object affinity tensor。</li>
+<li>原图像</li>
+</ul>
+<p>其中<span class="arithmatex">\(A_v\)</span>的处理方式如下：
+对于每一个cell(总共有<span class="arithmatex">\(\tau*H'*W'\)</span>个cell),由于稀疏attention,假设cell <span class="arithmatex">\(p\)</span>关注的集合为：
+<span class="arithmatex">\(I_p=\{x|x\in Attention(p)\}\)</span>
+其中<span class="arithmatex">\(I_p^o=\{x|x\in Attention(p)\space and\space x\in Object(o)\}\)</span>代表x是第o种广义对象（即所有对象和背景）
+对于每一个p和所有o，取<span class="arithmatex">\(Attention(p,I_p^o)\)</span>的最大值，也就是p最关心的o类对象的关心度，得到<span class="arithmatex">\(A_{v}^{l,o,p}\in R\)</span>
+最后<span class="arithmatex">\(A_v\in R^{L*O*\tau*H'*W'}\)</span>.再输入到Decoder里面。
+<img alt="" src="../imgs/Pasted%20image%2020240119150128.png" />
+这是作者提出的两种Sparse Attention方法。</p>
+<ul>
+<li>Grid Attention.对于每一个cell <span class="arithmatex">\(p\)</span>,只关心同时间同行，同时间同列，同行同列总共<span class="arithmatex">\(T+H+W-2\)</span>个<span class="arithmatex">\(cell\)</span>。</li>
+<li>Strided Attention.令<span class="arithmatex">\(h=\sqrt{H}\)</span>,<span class="arithmatex">\(I_p^1=\{(t,h,w)+(x,y,z)|x&lt;h,y&lt;h,z&lt;h\}\)</span> <span class="arithmatex">\(I_p^2=\{(t,h,w)+(x,y,z)|x,y,z\space mod\space h=0\}\)</span></li>
+</ul>
+<p>可以看出来Strided Attention是仿照1D的Strided Attention设计的</p>
+<h2 id="detr">DETR</h2>
+<p><img alt="" src="../imgs/Pasted%20image%2020240121000501.png" /></p>
+<ul>
+<li>backbone就是ResNet50+卷积，加上 PE（fixed or learned）</li>
+<li>encoder很正常，就是transformer的encoder</li>
+<li>decoder的object queries本质是一个自学习的锚框（类似），是一个可学习的<span class="arithmatex">\(N*n_{dim}\)</span>的embedding,N远大于object数量</li>
+<li>最后decoder得出的特征经过全连接形成具体的框框和class</li>
+<li>Loss采用匈牙利二分图匹配算法，找到一个匹配使得损失最小，损失主要包含classification损失和box损失，如果匹配到了empty类就没有损失。 box损失如图：<img alt="" src="../imgs/Pasted%20image%2020240121000800.png" /> IoU和Box中心距离作为双重损失。总损失如下：<img alt="" src="../imgs/Pasted%20image%2020240121000937.png" /></li>
+<li>tips:匈牙利匹配算法可以用<code>torch.cdist</code>函数</li>
+</ul>
+<h3 id="detrattention">可变形DETR+可变形Attention</h3>
+<p>可变形DETR在DETR的基础上使用了可变形卷积，保留了多个特征，改进了架构。</p>
+<ul>
+<li>可变形卷积：可变形卷积没有对卷积核进行任何修改，只在输入图像时把每一个像素随机或者按照规律平移一段距离，通过插值获得新值，然后将变形后的矩阵输入到卷积里面。<img alt="" src="../imgs/Pasted%20image%2020240121002335.png" /></li>
+<li>Attention:<img alt="" src="../imgs/Pasted%20image%2020240121002744.png" />其中<span class="arithmatex">\(x(p_q+\Delta p_{mqk})\)</span>表示图像经过偏移后得到的特征，M表示多头注意力头数，<span class="arithmatex">\(W_m\)</span>和<span class="arithmatex">\(W_m'\)</span>都是可训练的矩阵，<span class="arithmatex">\(A_{mqk}\)</span>表示k对应的Attention weight.<span class="arithmatex">\(K&lt;&lt;HW\)</span>.<img alt="" src="../imgs/Pasted%20image%2020240121003044.png" /></li>
+<li>特征可以从ResNet里面提取若干层，都可以attention.<img alt="" src="../imgs/Pasted%20image%2020240121003111.png" /><img alt="" src="../imgs/Pasted%20image%2020240121003117.png" /></li>
+<li>Deform Attention本质也是遮罩问题：原来一个点可以attention其它所有点，现在一个点只能关注周围随机的（就像Deform Convolution那样赋予一个随机偏移量）的若干个点，一般是三个，极大的加快了速度。<img alt="" src="../imgs/Pasted%20image%2020240121230913.png" />
+<span class="arithmatex">\(A_{mqk}\in [0,1]由Q全连接,可学习,K=3，\Delta p_{mqk}由Q全连接，可学习\)</span>.</li>
+</ul>
+<h2 id="bev-former">BEV Former</h2>
+<p>BEVFormer是基于DeformAttention的Transformer,DA公式如下：
+<img alt="" src="../imgs/Pasted%20image%2020240122011636.png" />
+架构图：
+<img alt="" src="../imgs/Pasted%20image%2020240120221522.png" />
+BEVFormer首先将多个摄像机的画面全部使用ResNet进行了特征提取，得到了若干个特征图；然后看Transformer部分，首先是
+- 时序自注意力机制。生成了一个<span class="arithmatex">\(H*W*C\)</span>的一个询问Q，再加上一个位置编码PE（由x和y生成，不细说，但是秩是小于等于H+W的）后，与上一帧的<span class="arithmatex">\(B_{t-1}\)</span>经过车辆传感器得知的参数（t-1到t之间的运动，旋转）进行对齐后注意力融合.公式如下：<img alt="" src="../imgs/Pasted%20image%2020240122100802.png" />训练过程中，我们在<span class="arithmatex">\(B_t\)</span>前面抽取三个样本<span class="arithmatex">\(B_{t-3},B_{t-2},B_{t-1}\)</span>(对齐了)。第一个由于没有前面的数据，于是退化为自注意力，然后得到<span class="arithmatex">\(B'_{t-3}\)</span>,之后不断融合，向前推进得到<span class="arithmatex">\(B'_{t-1}\)</span>，与<span class="arithmatex">\(Q\)</span>进行融合。注意，每个Q只和对应位置的一个像素进行融合。
+其次是
+- 空间交叉注意力融合，将查询的每一个像素与它关注的视角进行关联，公式如下：<img alt="" src="../imgs/Pasted%20image%2020240122011539.png" />其中<span class="arithmatex">\(V_{hit}\)</span>表示某一像素关注的视角的集合，<span class="arithmatex">\(N_{ref}\)</span>表示每一个视角关注的点的数量，<span class="arithmatex">\(P(p,i,j)\)</span>则是一个投影函数，获取查询的p点在第i个视角的第j个像素的位置。我们可以先把Q的<span class="arithmatex">\(p(x,y)\)</span>转化成世界下坐标<span class="arithmatex">\((x',y')\)</span>,然后通过变换变换到相机上面对应的一个柱子。这一个柱子对应的就是p点关注的点。</p>
+<h1 id="occ">OCC论文</h1>
+<p>精品综述（CSDN）：<a href="https://blog.csdn.net/weixin_46214675/article/details/135264258">here</a></p>
+<h2 id="voxformer">VoxFormer</h2>
+<p><img alt="" src="../imgs/Pasted%20image%2020240122234506.png" />
+这是一个单摄像机的任务。首先将摄像机过一个现成的深度估计模型，得到一个深度图（缺点：远处可能不准确），映射成三维的点云（每个像素一个点），然后和<span class="arithmatex">\(Q\in R^{h*w*z*d}\)</span>进行融合，其中d是很大的数，h,w,z小于原图的分辨率。这个怎么做呢？首先将三维稀疏点云经过一个初步的<span class="arithmatex">\(\Theta occ\)</span>变成了一个较低分辨率的<span class="arithmatex">\(M_{out}=\{0,1\}^{h*w*z}\)</span>，然后<span class="arithmatex">\(Q_p=Q[M_{out}]\)</span>由此产生很多空白（就是<span class="arithmatex">\(M_{out}=0\)</span>的部分），以节省开支。得到<span class="arithmatex">\(Q_p\)</span>后，用它和Image Features作DFA，公式如下：<img alt="" src="../imgs/Pasted%20image%2020240123003240.png" />
+我们注意到有一个东西叫做mask token，原因是<span class="arithmatex">\(Q_p\)</span>只选择了一部分的像素进行DCA,所以mask token就将剩余部分来表示。mask token是一个可学习的embedding，随着训练而改变。
+最后进行一个DA后上采样+全连接，秒了。</p>
+<h2 id="scene-as-occ">Scene as OCC</h2>
+<p><img alt="" src="../imgs/Pasted%20image%2020240123222300.png" />
+本篇文章主要提出了一个新的benchmark——openOCC，并且为这个数据集设计了一个新的网络OccNet.包括重建OCC和利用OCC两个部分。第一个部分将摄像头画面过backbone，得到features,然后结合了BEVFormer的Encoder部分，改进了Decoder:</p>
+<p>由于将BEV特征直接转化为Voxel特征会造成精度大量丢失，于是Decoder采用了串联式，设BEV特征为<span class="arithmatex">\(R^{Z_{BEV},H,W,C_{BEV}}\)</span>,Z表示高度，C表示数据维度。<span class="arithmatex">\(Z_{BEV}=1\)</span>,设Voxel特征为<span class="arithmatex">\(R^{Z_{OCC},H,W,C_{OCC}}\)</span>,Z更大了，C同样是维度。那么中间层得到的变量是<span class="arithmatex">\(R^{Z_i,H,W,C_i}\)</span>,其中<span class="arithmatex">\(Z_i\)</span>和<span class="arithmatex">\(C_i\)</span>都是<span class="arithmatex">\(BEV\)</span>到<span class="arithmatex">\(OCC\)</span>的线性插值。</p>
+<p>步骤：<span class="arithmatex">\(B_{t-1},Q_{t}\)</span>通过feedforward变成<span class="arithmatex">\(V'_{t-1}\)</span>和<span class="arithmatex">\(V'_{t}\)</span>,并且经过DA注意力得到细化后的<span class="arithmatex">\(V'_{t}\)</span>,以此类推。最终得到<span class="arithmatex">\(V_t\)</span>.之后的EoO就比较简单了，拿Occ数据来进行downstream的决策。</p>
+<p>值得注意的是，3D的DA有所改动：<img alt="" src="../imgs/Pasted%20image%2020240123234816.png" /></p>
+<p>其中K远小于HWZ.</p>
+<p>关于benchmark-openOCC,基于数据集nuScenes，为周围的摄像头提供了3DOcc和相关注释。</p>
+<p>对于如何生成注释，openOCC将Lidar的点集拆成前景和背景，在世界坐标系将静态背景进行累加，在对象坐标系中对运动前景进行累加，以达到较为精确的效果。更加密集。</p>
+<h2 id="occ3d">Occ3D</h2>
+<p>主要工作是构建了一个benchmark，分为Occ3d-waymo和Occ3d-nuScene.并且提出了“从粗略到精细占用网络”CTF-Occ.</p>
+<h3 id="_2">数据集的构建</h3>
+<p><img alt="" src="../imgs/Pasted%20image%2020240124104601.png" />
+任务：根据已知的数据集（多摄像头时序图像，3D激光雷达点云序列，来自IMU的3D位姿序列），采用半标注技术生成带语义Occ网格。既然是半标注，所以需要人工标注的框形语义信息和可选的点级语义信息。</p>
+<ul>
+<li>体素密集化：点云聚合，结合位姿信息处理激光雷达的点云，转化成世界坐标系，分割背景和前景，根据每帧的标注和以良好处理动态模糊，使用KNN进行标签重建，网孔重建使得信息更密集。</li>
+<li>遮挡推理：通过射线法判断哪些体素是看得到的，哪些是看不到的，得到一个“未知”掩码mask,单独设置为“未知”标签。</li>
+<li>基于图像的体素细化：本文使用图像的语义分割掩膜建立3D体素与2D像素的关系。类似上一步中的射线投射方法连接图像原点与占用体素，找到与图像像素语义标签相同的第一个体素，并设置射线穿过的之前所有体素为“空”。</li>
+</ul>
+<h3 id="ctf-occ">CtF-Occ</h3>
+<p><img alt="" src="../imgs/Pasted%20image%2020240125220621.png" />
+我们可以看到，首先将图像经过backbone形成多维特征，并且将backbone的分层中间层分别作为输入到细化过程，接下来看细化过程：</p>
+<ul>
+<li>首先是一个比较小，精度比较低的体素Embedding,经过Token Selection和3D与2D之间的空间交叉注意力融合形成一个体素的结果，再经过3D卷积进一步细化，并与下一个匹配的特征进行融合。</li>
+<li>为了减少计算，引入了Token Selection的概念，利用标签Occ有监督地训练一个判别器判断某点体素是否为空，并且把不确定是否为空的留下来计算，确定是空的就不用计算了。这个判别器选择最不确定的K个体素参与后续计算，K是超参数</li>
+<li>最后得到<span class="arithmatex">\(R^{长宽高C'}\)</span>的一个东西，我们把每一个像素过一遍MLP，得到<span class="arithmatex">\(R^{长宽高C}\)</span>的Occ网络，其中C是语意数量。</li>
+</ul>
+<p>优势：摆脱了BEV压缩高度的限制，对小物体识别精度更高。</p>
+<h2 id="fb-occ">FB-OCC</h2>
+<h3 id="forward-and-backward">Forward and backward</h3>
+<ul>
+<li>forward projection(前向投影)是指依据每一个2D图像的像素点，画出一条射线，射到3D点上面，如图：![](imgs/Pasted image 20240125224729.png]]缺点很明显：就是在远处会比较稀疏，不能完全覆盖所有的体素。VoxFormer就才用了前向投影的思想。</li>
+<li>backward projection(反向投影)与前向投影相反，对于每一个体素，计算在图像上的位置，，BEVFormer就是基于反向投影的。反向投影也存在一些缺点，就是可能无法正确处理遮挡关系，为此当然提出了一些比如遮挡mask等技术来解决此类问题。BEVFormer在空间注意力融合的时候就
+本文将Forward和Backward进行了融合，同时结合了两者的优点，具体操作为：</li>
+<li>为了解决前向投影的稀疏问题，我们使用反向投影特征来提炼出前向投影中的稀疏部分。</li>
+<li>为了解决反向投影的深度问题缺失，而产生“假阳性”（即看不到的地方多出来了语义信息）的问题，文章才用了深度感知的反向投影，利用深度关系来“衡量”每一个投影的质量，从而达到抑制假阳性的目的。</li>
+</ul>
+<h3 id="_3">模型架构</h3>
+<p><img alt="" src="../imgs/Pasted%20image%2020240126145318.png" />
+首先用backbone提取图像特征，得到一个Image Features <span class="arithmatex">\(F\)</span>,随后使用Depth Net将图像进行一个深度化操作，得到深度图像；</p>
+<ul>
+<li>Forward Projection，结合图像特征和深度特征，将每一个图片像素点投影在空间点云中，得到一个稀疏的点云。</li>
+<li>Backward Projection，将拍扁后的点云图作为BEV的Query，结合深度信息和图像信息进行一个BEVFormer类似的操作，即为Depth-Aware Backward Projection。最后得到BEV特征。</li>
+<li>将BEV特征升维之后与Forward Projection的点云图进行融合，得到Occupancy Head用于downstream.</li>
+</ul>
+<h3 id="_4">模型训练</h3>
+<p>文章提出了2D转3D的backbone中常见的问题——过拟合。如果backbone参数量过大，可能会造成过拟合。但是相比于之前300M和100M的backbone,本文用了1B参数量的InternetImageH作为backbone。</p>
+<ul>
+<li>深度预训练，将深度信息单独作为一部分进行有监督学习，为了防止模型过于偏向深度信息，语义先验丢失，我们对Image Features进行一个Semantic Mask的有监督学习。但是雷达点云没有语义信息怎么办呢，于是作者使用了SAM模型进行了自动标记；对nuScenes提供的具有边界框注释的事物类别，使用框提示为每个对象生成高质量的语义掩码；对于没有边界框注释的道路与建筑物等信息，我们只能利用点云语义分割信息，对于每个类别我们选三个点作为点提示，以生成相应的语义掩码。
+我们将预训练的模型作为后续训练的起始点。</li>
+</ul>
+<h3 id="_5">模型预测</h3>
+<ul>
+<li>通过水平反转输入图像，水平垂直翻转3D空间后取平均得到最终结果。</li>
+<li>使用时间测试时间增强策略（TTA），对于静态体素，采用先前帧的靠近自我车的体素来替换当前帧的体素，因为越远精度越低。</li>
+</ul>
+<h2 id="occformer">OccFormer</h2>
+<p><img alt="" src="../imgs/Pasted%20image%2020240128211901.png" /></p>
+<p>模型结构:</p>
+<ul>
+<li>Image Encoder，除了将图像信息进行了一个backbone之后，额外进行了一个neck操作。最后分辨率是原图像的<span class="arithmatex">\(\frac{1}{16}\)</span>.</li>
+<li>使用类似LSS的范式得到3D的Depth Distribution:<span class="arithmatex">\(R^{N*D*H*W}\)</span>,获得上下文特征Context Feature<span class="arithmatex">\(R^{N*C_{conv}*H*W}\)</span>,二者做乘法得到<span class="arithmatex">\(R^{N*D*H*W*C_{conv}}\)</span>的特征，通过体素池化（减少特征量，类似2D池化）得到<span class="arithmatex">\(R^{C_{conv}*X*Y*Z}\)</span>的体素网格。</li>
+<li><img alt="" src="../imgs/Pasted%20image%2020240128224501.png" /></li>
+</ul>
+<p>Dual Path Transformer:主要分为两部分：</p>
+<ul>
+<li>Local部分直接使用3D特征，用于捕捉细颗粒度特征；</li>
+<li>
+<p>Global部分使用拍扁后的2D特征，用于捕捉全局较大的特征。
+两者使用共享权重的windowed Attention进行注意力处理，考虑到BEV特征如果之后直接进行Self-attention的话太消耗内存了，于是使用了ASPP技术，并且用bottleneck使得通道数减少了四倍。<img alt="" src="../imgs/Pasted%20image%2020240128224919.png" />
+ASPP（上图）
+之后再和全连接后的Local特征进行乘法，与Local体素特征进行融合后输出。
+unsqueeze是沿着高度方向的。
+<img alt="" src="../imgs/Pasted%20image%2020240128225138.png" /></p>
+</li>
+<li>
+<p>Transformer Occupancy Decoder:采用比较火的语义3D Mask思路，包括transformer decoder和pixel decoder两部分。最终的掩码预测由这两个嵌入之间的点乘得出的。</p>
+</li>
+<li>Pixel Decoder:也就是Multi-Scaled Deformable Attention，对于每一个点，加上注意力权重乘以周围不同Layer的某若干个点，增强多尺度特征的语义信息：<img alt="" src="../imgs/Pasted%20image%2020240128230522.png" /><span class="arithmatex">\(N_l\)</span>表示层级数量。</li>
+<li>Transformer Decoder<img alt="" src="../imgs/Pasted%20image%2020240129094214.png" />我们细看这张图，主要流程是：对于第一个decoder,Query是参数化的序列；然后与Voxel Features进行Masked Attention后进行self-attention,最后全连接后，重新加上遮罩，作为<span class="arithmatex">\(Q_{2}\)</span>的Query Features继续和下一个scale的特征融合作为Voxel输入，而新的Query Feature被这样生成：<img alt="" src="../imgs/Pasted%20image%2020240129094358.png" />
+其中<span class="arithmatex">\(M_{l-1}\)</span>表示遮罩，由0和<span class="arithmatex">\(-\infty\)</span>组成，表示该体素关心的点；然后就是比较typicle的<span class="arithmatex">\(softmax(QK^T)V\)</span>再加上残差。注意，L次迭代的每一次迭代结束，Query Features都会被拿去预测一遍语义信息<span class="arithmatex">\(p_l\)</span>和一个mask embedding,最后mask embedding经过per-pixel操作（Mask2Former类似）之后和sigmoid点积得到3D掩码<span class="arithmatex">\(M_{l}\)</span>,最后占用预测为：
+<span class="arithmatex">\(<span class="arithmatex">\(Y=\sum_{i=1}^{N_q}p_i\cdot M_i\)</span>\)</span></li>
+<li>Preserve Pooling 考虑每次得到的mask都要降维给下一迭代使用，Mask2Former采用双线性插值以保留局部特征，本文使用简单的最大池化，取得了不错的效果。</li>
+<li>Class-Guided Sampling 由于3D空间中样本的非均匀性，在计算损失的时候，首先估计训练集中每个样本的频率，再按照<span class="arithmatex">\(w_c=1/n_c\)</span>,<span class="arithmatex">\(w_c=w_c/min(w_c),w_c=(w_c)^\beta\)</span>进行设置采样频率，以达到样本越小，采样频率越高的效果。</li>
+</ul>
+<h2 id="surround-occ">Surround Occ</h2>
+<p><img alt="" src="../imgs/Pasted%20image%2020240130161047.png" />
+主要就是多个尺度的特征图经过backbone后传入2D-3DSpatial Attention,之后形成3D特征，每个3D特征等于自己特征图得出的加上自己上面小尺度3D特征反卷积得出，最后进行OccPrediction，每一个尺度都单独进行监督。
+- Spatial Cross-Attention。在重建3D的时候，传统方法对于每一个3D的体素，它关心每一个视图的权重是相同的，这会产生错误导致效果不好，为此，作者提出了2D-3D 空间交叉注意力，如图（左1）<img alt="" src="../imgs/Pasted%20image%2020240130170215.png" />对于每一个需要重建的3D体素，模仿BEV的方法，只关心命中的视图的具体某一处点，这属于Backward方法.<img alt="" src="../imgs/Pasted%20image%2020240130170739.png" />(类似BEV)
+- 基于Lidar稀疏点云和有限语义标注的标签生成器：<img alt="" src="../imgs/Pasted%20image%2020240130170944.png" />思路和之前比较类似，分割动态和静态，叠加，补全。</p>
+<h3 id="selfocc">SelfOcc</h3>
+<p><img alt="" src="../imgs/Pasted%20image%2020240131104857.png" /></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
